@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F3FFF5"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/modBebekButton"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:background="@mipmap/ic_baby_baby"
+        android:fontFamily="@font/mouse_memoirs"
+        android:paddingTop="70dp"
+        android:text="@string/bebek_telefonu"
+        android:textColor="#F44336"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/modEbeveynButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/modEbeveynButton"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:background="@mipmap/ic_baby_parents"
+        android:fontFamily="@font/mouse_memoirs"
+        android:paddingTop="70dp"
+        android:text="@string/ebeveyn_telefonu"
+        android:textColor="#F44336"
+        android:textSize="18sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/modBebekButton"
+        app:layout_constraintStart_toEndOf="@+id/modBebekButton"
+        app:layout_constraintEnd_toEndOf="parent"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

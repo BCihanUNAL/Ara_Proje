@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Baby Monitor v2</string>
+    <string name="ebeveyn_telefonu">Ebeveyn Telefonu</string>
+    <string name="bebek_telefonu">Bebek Telefonu</string>
+    <string name="l_tfen_a_a_daki_ifreyi_ba_lanmak_istedi_iniz_ebeveyn_telefonuna_giriniz">Lütfen Aşağıdaki Şifreyi Bağlanmak istediğiniz Ebeveyn Telefonuna Giriniz</string>
+    <string name="_123456">123456</string>
+    <string name="l_tfen_bebek_telefonundaki_ifreyi_a_a_ya_giriniz">Lütfen Bebek Telefonundaki Şifreyi Aşağıya Giriniz</string>
+    <string name="pin_kodunu_giriniz">Pin Kodunu Giriniz</string>
+    <string name="ba_lan">Bağlan</string>
+</resources>

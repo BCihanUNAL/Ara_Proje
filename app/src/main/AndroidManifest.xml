@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.babymonitorv2">
+
+    <uses-permission
+        android:name="android.permission.ACCESS_FINE_LOCATION"
+        android:required="true" />
+    <uses-permission
+        android:name="android.permission.ACCESS_NETWORK_STATE"
+        android:required="true"/>
+    <uses-permission
+        android:name="android.permission.ACCESS_WIFI_STATE"
+        android:required="true" />
+    <uses-permission
+        android:name="android.permission.CHANGE_WIFI_STATE"
+        android:required="true" />
+    <uses-permission
+        android:name="android.permission.INTERNET"
+        android:required="true" />
+    <uses-permission
+        android:name="android.permission.RECORD_AUDIO"
+        android:required="true"/>
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_baby_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_baby_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        android:launchMode="singleInstance">
+        <activity android:name=".BebekMonitorActivity"></activity>
+        <activity android:name=".EbeveynDinlemeActivity"
+                  android:launchMode="singleTask"/>
+        <activity android:name=".EbeveynServisKayitActivity" />
+        <activity android:name=".BebekServisKayitActivity" />
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <service android:name=".EbeveynDinlemeActivity$EbeveynDinlemeServis"/>
+        <receiver android:name=".EbeveynDinlemeActivity$EbeveynDinlemeServis$CloseButton">
+            <intent-filter>
+                <action android:name="Close_Button" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".EbeveynDinlemeActivity$EbeveynDinlemeServis$ListenButton">
+            <intent-filter>
+                <action android:name="Listen_Button" />
+            </intent-filter>
+        </receiver>
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
+    </application>
+
+</manifest>

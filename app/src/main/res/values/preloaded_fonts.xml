@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="preloaded_fonts" translatable="false">
+        <item>@font/cherry_cream_soda</item>
+        <item>@font/galada</item>
+        <item>@font/kite_one</item>
+        <item>@font/mouse_memoirs</item>
+    </array>
+</resources>
