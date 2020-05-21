@@ -11,33 +11,53 @@
         android:id="@+id/ebeveynKayitBilgiTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="96dp"
+        android:fontFamily="@font/mouse_memoirs"
         android:text="@string/l_tfen_bebek_telefonundaki_ifreyi_a_a_ya_giriniz"
-        android:textSize="18sp"
+        android:textAlignment="center"
+        android:textColor="#3D3E5F"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/ebeveynKayitIsimEditText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
+        android:id="@+id/ebeveynKayitIsimEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="@string/ocu_un_smini_giriniz"
+        android:inputType="textPersonName"
+        app:layout_constraintBottom_toTopOf="@id/ebeveynKayitPinEditText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ebeveynKayitBilgiTextView"
+        app:layout_constraintStart_toStartOf="parent"
+        android:importantForAutofill="no" />
+
+    <EditText
         android:id="@+id/ebeveynKayitPinEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="96dp"
+        android:layout_marginBottom="50dp"
         android:ems="10"
         android:hint="@string/pin_kodunu_giriniz"
         android:importantForAutofill="no"
         android:inputType="number"
+        app:layout_constraintBottom_toTopOf="@id/ebeveynKayitServisBaglantiButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ebeveynKayitBilgiTextView" />
+        app:layout_constraintTop_toBottomOf="@+id/ebeveynKayitIsimEditText" />
 
     <Button
         android:id="@+id/ebeveynKayitServisBaglantiButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginBottom="100dp"
         android:text="@string/ba_lan"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/ebeveynKayitPinEditText" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

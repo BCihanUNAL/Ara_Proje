@@ -2,11 +2,9 @@
 OC Volume - Java Speech Recognition Engine
 Copyright (c) 2002-2004, OrangeCow organization
 All rights reserved.
-
 Redistribution and use in source and binary forms,
 with or without modification, are permitted provided
 that the following conditions are met:
-
 * Redistributions of source code must retain the
   above copyright notice, this list of conditions
   and the following disclaimer.
@@ -20,7 +18,6 @@ that the following conditions are met:
   endorse or promote products derived from this
   software without specific prior written
   permission.
-
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS
 AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -37,7 +34,6 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
-
 Contact information:
 Please visit http://ocvolume.sourceforge.net.
 */
@@ -364,7 +360,7 @@ public class FeatureExtraction{
         // apply pre-emphasis to each sample
         for (int n = 1; n < inputSignal.length; n++){
             outputSignal[n] = (double)(inputSignal[n]) - preEmphasisAlpha * (double)(inputSignal[n - 1]);
-            //outputSignal[n] /= 32768.0;
+            outputSignal[n] /= 32768.0;
         }
 
         return outputSignal;

@@ -35,10 +35,21 @@ public class EbeveynServisKayitActivity extends AppCompatActivity {
     private final int REQUEST_CODE = 801;
 
     @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ebeveyn_servis_kayit);
         Log.d(TAG, "onCreate: yeni bastan" + isDiscoveryEnabled);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+
 
         if(nsdManager == null){
             nsdManager = (NsdManager) getSystemService(Context.NSD_SERVICE);
@@ -77,6 +88,7 @@ public class EbeveynServisKayitActivity extends AppCompatActivity {
                                     isDiscoveryEnabled = false;
                                     Intent intent = new Intent(EbeveynServisKayitActivity.this, EbeveynDinlemeActivity.class);
                                     intent.putExtra("ServiceName", serviceName);
+                                    intent.putExtra("ChildName",((EditText)findViewById(R.id.ebeveynKayitIsimEditText)).getText().toString());
                                     startActivityForResult(intent, REQUEST_CODE);
 
                                     Log.d(TAG, "onClick: Socket connected " + mediaSocket.getPort() + " " + mediaSocket.getInetAddress().toString());
@@ -164,13 +176,11 @@ public class EbeveynServisKayitActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        if(!isChangingConfigurations()) {
-            Log.d(TAG, "onDestroy: ");
-            if (isDiscoveryEnabled) {
-                nsdManager.stopServiceDiscovery(discoveryListener);
-                isDiscoveryEnabled = false;
-                Log.d(TAG, "onDestroy: " + isDiscoveryEnabled);
-            }
+        Log.d(TAG, "onDestroy: ");
+        if (isDiscoveryEnabled) {
+            nsdManager.stopServiceDiscovery(discoveryListener);
+            isDiscoveryEnabled = false;
+            Log.d(TAG, "onDestroy: " + isDiscoveryEnabled);
         }
         super.onDestroy();
     }

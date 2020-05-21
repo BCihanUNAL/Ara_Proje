@@ -35,10 +35,19 @@ public class BebekServisKayitActivity extends AppCompatActivity {
     private static NsdManager nsdManager;
 
     @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bebek_servis_kayit);
         final TextView sifreTv = (TextView) findViewById(R.id.bebekKayitSifreTextView);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         if(nsdManager == null){
             nsdManager = (NsdManager)getSystemService(Context.NSD_SERVICE);
@@ -52,7 +61,7 @@ public class BebekServisKayitActivity extends AppCompatActivity {
             try {
                 Log.d(TAG, "onCreate: girdi");
                 final ArrayList<Integer> pinList = checkPinCode();
-                Thread.sleep(750);
+                Thread.sleep(400);
                 nsdManager.stopServiceDiscovery(discoveryListener);
                 final int pinCode = createPinCode(pinList);
                 sifreTv.setText(Integer.toString(pinCode));
@@ -171,16 +180,16 @@ public class BebekServisKayitActivity extends AppCompatActivity {
 
     private int createPinCode(ArrayList<Integer> pinList){
 
-        int newPin = (int)(Math.random() * 1000000.0);
+        int newPin = (int)(Math.random() * 999999.0);
         if(newPin < 100000)
             newPin += 100000;
 
         for(int i = 0; i < pinList.size(); i++){
             if(newPin == pinList.get(i)){
-                newPin = (int)(Math.random() * 1000000.0);
+                newPin = (int)(Math.random() * 999999.0);
                 if(newPin < 100000)
                     newPin += 100000;
-                i = -1;
+                i = 0;
             }
         }
 
@@ -222,7 +231,6 @@ public class BebekServisKayitActivity extends AppCompatActivity {
 
             }
         };
-
             nsdManager.registerService(nsdServiceInfo, NsdManager.PROTOCOL_DNS_SD, registrationListener);
             isRegistrationEnabled = true;
     }

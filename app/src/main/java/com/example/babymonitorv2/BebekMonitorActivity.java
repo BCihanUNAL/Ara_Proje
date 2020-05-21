@@ -1,6 +1,7 @@
 package com.example.babymonitorv2;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -42,7 +43,7 @@ public class BebekMonitorActivity extends AppCompatActivity {
     }
 
     private static final String MODEL_FILE = "file:///android_asset/baby_model.pb";
-    private static final String INPUT_NODE = "flatten_input";//bu ikisinin adına bak
+    private static final String INPUT_NODE = "flatten_input";
     private static final String OUTPUT_NODE = "output/Softmax";//
     private static final String TAG = "BebekMonitorActivity";
     private static Socket socket;
@@ -51,11 +52,10 @@ public class BebekMonitorActivity extends AppCompatActivity {
     private static final int RECORDER_AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
     private AudioRecord recorder = null;
     private Thread recordingThread = null;
-    Recorder recordingThread_1 = null;
     private boolean isRecording = false;
     private boolean isListening = false;
     private BebekMonitorActivity bebekMonitorActivity;
-    private Timer timer;
+    private static Timer timer;
     public static short processData[];
     private static int offset;
     private static int[] INPUT_SHAPE = {13*157};
@@ -64,10 +64,25 @@ public class BebekMonitorActivity extends AppCompatActivity {
     private static TensorFlowInferenceInterface tensorFlowInferenceInterface;
 
     @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bebek_monitor);
+        if(savedInstanceState != null && savedInstanceState.containsKey("iscrying")){
+            isListening = savedInstanceState.getBoolean("islistening");
+            isRecording = savedInstanceState.getBoolean("isrecording");
+            isCrying = savedInstanceState.getBoolean("iscrying");
+        }
         bebekMonitorActivity = this;
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
         if(!isCrying) {
             bebekMonitorActivity.runOnUiThread(new Runnable() {
                 @Override
@@ -87,7 +102,6 @@ public class BebekMonitorActivity extends AppCompatActivity {
             });
         }
         if(!isCreated) {
-            Log.d(TAG, "onCreate: girdik baba");
             isCreated = true;
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
                     .permitAll().build();
@@ -165,7 +179,7 @@ public class BebekMonitorActivity extends AppCompatActivity {
                 float MFCC[] = new float[doubleMFCC.length * doubleMFCC[0].length];
                 for (int i = 0; i < doubleMFCC.length; i++) {
                     for (int j = 0; j < doubleMFCC[0].length; j++) {
-                        MFCC[i * doubleMFCC[0].length + j] = (float) (doubleMFCC[i][j]/10000.0); // duzelt bunlari
+                        MFCC[i * doubleMFCC[0].length + j] = (float) (doubleMFCC[i][j]); // duzelt bunlari
                     }
                 }
                 tensorFlowInferenceInterface.feed(INPUT_NODE, MFCC, 1, INPUT_SHAPE[0]);
@@ -261,12 +275,10 @@ public class BebekMonitorActivity extends AppCompatActivity {
                 }
                 recorder.read(sData, 0, sData.length);
                 /*double sum = 0.0;
-
                 for(int i = 0; i < sData.length; i++){
                     double sample = ((double)sData[i])/32768.0;
                     sum += (sample*sample);
                 }
-
                 double decibel = 20.0 * Math.log10(Math.sqrt(2.0 * sum / sData.length));*/
 
                 byte bData[] = short2byte(sData);
@@ -331,19 +343,10 @@ public class BebekMonitorActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        isListening = savedInstanceState.getBoolean("isListening");
-        isRecording = savedInstanceState.getBoolean("isRecording");
-        isCrying = savedInstanceState.getBoolean("isCrying");
-
-    }
-
-    @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putBoolean("isListening",isListening);
-        outState.putBoolean("isRecording",isRecording);
-        outState.putBoolean("isCrying",isCrying);
+        outState.putBoolean("islistening",isListening);
+        outState.putBoolean("isrecording",isRecording);
+        outState.putBoolean("iscrying",isCrying);
         super.onSaveInstanceState(outState);
     }
 
@@ -404,12 +407,11 @@ public class BebekMonitorActivity extends AppCompatActivity {
             float MFCC[] = new float[doubleMFCC.length * doubleMFCC[0].length];
             for (int i = 0; i < doubleMFCC.length; i++) {
                 for (int j = 0; j < doubleMFCC[0].length; j++) {
-                    MFCC[i * doubleMFCC[0].length + j] = (float) (doubleMFCC[i][j]/10000.0); // duzelt bunlari
+                    MFCC[i * doubleMFCC[0].length + j] = (float) (doubleMFCC[i][j]); // duzelt bunlari
                 }
             }
             tensorFlowInferenceInterface.feed(INPUT_NODE, MFCC, 1, 5603);
 
-            //tensorFlowInferenceInterface.fillNodeFloat(INPUT_NODE, INPUT_SHAPE, MFCC);
             tensorFlowInferenceInterface.run(new String[]{OUTPUT_NODE});
             float results[] = {0, 0};
             tensorFlowInferenceInterface.fetch(OUTPUT_NODE, results);
