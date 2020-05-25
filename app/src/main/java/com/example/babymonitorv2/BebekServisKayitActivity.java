@@ -4,13 +4,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
+import android.view.WindowManager;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -33,11 +36,16 @@ public class BebekServisKayitActivity extends AppCompatActivity {
     private static NsdManager.DiscoveryListener discoveryListener;
     private static NsdManager.RegistrationListener registrationListener;
     private static NsdManager nsdManager;
+    private static boolean showError = false;
 
     @Override
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
+    }
+
+    public static void showErrorOnReturn(){
+        showError = true;
     }
 
     @Override
@@ -102,6 +110,18 @@ public class BebekServisKayitActivity extends AppCompatActivity {
             /*Intent intent = getIntent();
             finish();
             startActivity(intent);*/
+            if(showError) {
+                AlertDialog alertDialog = new AlertDialog.Builder(this)
+                        .setTitle("Hata")
+                        .setMessage("Karşı cihaz ile olan bağlantınız koptu. Lütfen Tekrar deneyin")
+                        .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        }).create();
+                alertDialog.show();
+                showError = false;
+            }
             giveNewPin = true;
             recreate();
         }
@@ -205,6 +225,8 @@ public class BebekServisKayitActivity extends AppCompatActivity {
             nsdServiceInfo.setServiceName("YtuceBabyMonitor"+pinCode);
             nsdServiceInfo.setServiceType("_ytucebabymonitor._tcp");
             nsdServiceInfo.setPort(port);
+
+            Log.d(TAG, "registerService: port = " + port);
 
             Log.d(TAG, "registerService: Pin Code = " + Integer.toString(pinCode));
 

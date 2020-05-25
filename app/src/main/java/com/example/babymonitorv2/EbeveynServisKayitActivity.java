@@ -3,7 +3,9 @@ package com.example.babymonitorv2;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
@@ -12,6 +14,7 @@ import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -27,7 +30,7 @@ public class EbeveynServisKayitActivity extends AppCompatActivity {
     private static HashMap<Integer, NsdServiceInfo> serviceInfoHashMap;
     private static final String serviceType = "_ytucebabymonitor._tcp.";
     private static final String TAG = "EbeveynServisKayitActiv";
-    private static Socket mediaSocket;
+    //private static Socket mediaSocket;
     private static NsdManager.ResolveListener resolveListener;
     private static NsdManager.DiscoveryListener discoveryListener;
     private static boolean isDiscoveryEnabled = false;
@@ -82,16 +85,18 @@ public class EbeveynServisKayitActivity extends AppCompatActivity {
                                     String serviceName = nsdServiceInfo.getServiceName();
                                     serviceName = serviceName.replace("\\\\032", " ");
                                     serviceName = serviceName.replace("\\032", " ");
-                                    mediaSocket = new Socket(nsdServiceInfo.getHost().getHostAddress(), nsdServiceInfo.getPort());
+                                    //mediaSocket = new Socket(nsdServiceInfo.getHost().getHostAddress(), nsdServiceInfo.getPort());
                                     EbeveynDinlemeActivity.initBooleanVariables();
                                     nsdManager.stopServiceDiscovery(discoveryListener);
                                     isDiscoveryEnabled = false;
                                     Intent intent = new Intent(EbeveynServisKayitActivity.this, EbeveynDinlemeActivity.class);
                                     intent.putExtra("ServiceName", serviceName);
                                     intent.putExtra("ChildName",((EditText)findViewById(R.id.ebeveynKayitIsimEditText)).getText().toString());
+                                    intent.putExtra("HostAddress",nsdServiceInfo.getHost().getHostAddress());
+                                    intent.putExtra("Port",nsdServiceInfo.getPort());
                                     startActivityForResult(intent, REQUEST_CODE);
 
-                                    Log.d(TAG, "onClick: Socket connected " + mediaSocket.getPort() + " " + mediaSocket.getInetAddress().toString());
+                                   // Log.d(TAG, "onClick: Socket connected " + mediaSocket.getPort() + " " + mediaSocket.getInetAddress().toString());
 
                                 } catch (Exception e) {
                                     e.printStackTrace();
@@ -105,9 +110,9 @@ public class EbeveynServisKayitActivity extends AppCompatActivity {
         }
     }
 
-    public static Socket getParentSocket(){
-        return mediaSocket;
-    }
+   // public static Socket getParentSocket(){
+   //     return mediaSocket;
+   // }
 
     private void discoverService(){
         discoveryListener = new NsdManager.DiscoveryListener() {

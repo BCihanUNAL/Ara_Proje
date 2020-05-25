@@ -19,8 +19,8 @@ public class AudioStreamer {
     private AudioTrack audioTrack;
     private static boolean isPlaying = false;
 
-    private AudioStreamer(Activity activity){
-        caller = activity;
+    private AudioStreamer(){
+        //caller = activity;
         Log.i(TAG, "Setting up stream");
 
         final int frequency = 16000;
@@ -35,12 +35,13 @@ public class AudioStreamer {
                 bufferSize,
                 AudioTrack.MODE_STREAM);
 
-        caller.setVolumeControlStream(AudioAttributes.USAGE_VOICE_COMMUNICATION);
+        audioTrack.setVolume(1.0f);
+        //caller.setVolumeControlStream(AudioAttributes.USAGE_VOICE_COMMUNICATION);
     }
 
-    public static AudioStreamer getInstance(Activity activity){
+    public static AudioStreamer getInstance(){
         if(instance == null)
-            instance = new AudioStreamer(activity);
+            instance = new AudioStreamer();
         return instance;
     }
 

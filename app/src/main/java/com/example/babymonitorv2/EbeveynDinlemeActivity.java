@@ -22,12 +22,19 @@ import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.os.StrictMode;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -35,11 +42,14 @@ import android.widget.Button;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
+import com.google.android.material.snackbar.Snackbar;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -52,13 +62,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class EbeveynDinlemeActivity extends AppCompatActivity {
     private static final String TAG = "EbeveynDinlemeActivity";
     public static final String CHANNEL_ID = "EbeveynServiceChannel";
-    private static Socket socket;
+    //private static Socket socket;
     private static boolean isVoiceButtonSet = false;
     private static boolean trigger = false;
     private static boolean isServiceOpen = false;
+    public static boolean newChild;
     private static Context context;
     private static Intent intent;
-    private static Activity currentActivity;
+    //private static Activity currentActivity;
     private static DataInputStream dataInputStream;
     private static DataOutputStream dataOutputStream;
     private static NotificationManager notificationManager;
@@ -80,29 +91,41 @@ public class EbeveynDinlemeActivity extends AppCompatActivity {
 
 
         if(!isServiceOpen) {
-            socket = EbeveynServisKayitActivity.getParentSocket();
+            //socket = EbeveynServisKayitActivity.getParentSocket();
 
             childName = getIntent().getStringExtra("ChildName");
-            currentActivity = this;
-            try {
-                dataInputStream = new DataInputStream(socket.getInputStream());
+            //currentActivity = this;
+            newChild = true;
+
+
+            if(!isServiceOpen) {
+                isServiceOpen = true;
+                try {
+                /*dataInputStream = new DataInputStream(socket.getInputStream());
                 dataOutputStream = new DataOutputStream(socket.getOutputStream());
 
-                socket.setSoTimeout(10000);
-            }
-            catch(Exception e){
-                e.printStackTrace();
-            }
+                socket.setSoTimeout(10000);*/
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
-            Log.d(TAG, "onCreate: socket = " + socket.getInetAddress().toString());
-            context = this;
-            createNotificationChannel();
+               // Log.d(TAG, "onCreate: socket = " + socket.getInetAddress().toString());
+                context = this;
+                createNotificationChannel();
 
-            intent = new Intent(EbeveynDinlemeActivity.this, EbeveynDinlemeServis.class);
-            startService(intent);
+                intent = new Intent(EbeveynDinlemeActivity.this, EbeveynDinlemeServis.class);
+                intent.putExtra("HostAddress",getIntent().getStringExtra("HostAddress"));
+                intent.putExtra("Port",getIntent().getIntExtra("Port",0));
+                startService(intent);
+            }
+            else{
+                newChild = true;
+                EbeveynDinlemeServis.addNewChild(getPackageName(), getIntent().getStringExtra("HostAddress"), getIntent().getIntExtra("Port",0));
+            }
         }
 
     }
+
 
     private void createNotificationChannel(){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
@@ -117,15 +140,29 @@ public class EbeveynDinlemeActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.ebeveyn_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Intent in = new Intent(this, EbeveynServisKayitActivity.class);
+        startActivity(in);
+        return super.onOptionsItemSelected(item);
+    }
+
     public static void initBooleanVariables(){
         trigger = false;
         isServiceOpen = false;
         isVoiceButtonSet = false;
     }
 
-    public static Socket getParentSocket(){
-        return EbeveynServisKayitActivity.getParentSocket();
-    }
+    //public static Socket getParentSocket(){
+    //    return EbeveynServisKayitActivity.getParentSocket();
+    //}
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
@@ -150,9 +187,12 @@ public class EbeveynDinlemeActivity extends AppCompatActivity {
         private Thread listen;
         private Timer timer;
         private Notification notification;
+        private static Intent serviceIntent;
         private boolean isCrying;
         private static Button listenButton;
         private static Button serviceButton;
+        private static Context serviceContext;
+        private static ArrayList<CustomNotification> notificationList;
 
 
         public EbeveynDinlemeServis(){
@@ -166,10 +206,10 @@ public class EbeveynDinlemeActivity extends AppCompatActivity {
                     .permitAll().build();
             StrictMode.setThreadPolicy(policy);
 
-            isCrying = false;
-            isServiceOpen = true;
+            if(notificationList == null)
+                notificationList = new ArrayList<>();
 
-            timer = new Timer();
+            /*timer = new Timer();
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
@@ -200,7 +240,7 @@ public class EbeveynDinlemeActivity extends AppCompatActivity {
                         });
                     }
                 }
-            },1000, 3000);
+            },1000, 3000);*/
 
 
         }
@@ -242,12 +282,12 @@ public class EbeveynDinlemeActivity extends AppCompatActivity {
                         Toast.makeText(EbeveynDinlemeServis.this, "Bebek telefonunu dinleyebilmek için servisi aktifleştirmelisiniz.", Toast.LENGTH_LONG).show();
                         return;
                     }*/
-                    if(socket.isClosed()){
+                   /* if(socket.isClosed()){
                         Toast.makeText(EbeveynDinlemeServis.this, "Bağlantınız koptu. Lütfen ebeveyn telefonu ile tekrar bağlantı kurun", Toast.LENGTH_LONG).show();
                         stopForeground(true);
                         stopSelf();
                         return;
-                    }
+                    }*/
                     trigger = true;
                     try {
                         if (isVoiceButtonSet) {
@@ -264,7 +304,7 @@ public class EbeveynDinlemeActivity extends AppCompatActivity {
 
         }
 
-        private void initialize(){
+        /*private void initialize(){
             final Intent closeButton = new Intent(this, CloseButton.class);
             closeButton.setAction("Close_Button");
             closeButton.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -389,15 +429,37 @@ public class EbeveynDinlemeActivity extends AppCompatActivity {
                 }
             });
             listen.start();
-        }
+        }*/
 
         @Override
         public int onStartCommand(Intent intent, int flags, int startId) {
-            initialize();
+            //initialize();
+            serviceContext = this;
+            newChild = true;
+            serviceIntent = intent;
+            addNewChild(getPackageName(),intent.getStringExtra("HostAddress"),intent.getIntExtra("Port",0));
+
             return START_NOT_STICKY;
         }
 
-        private short[] byte2short(byte[] bData) {
+        protected static void addNewChild(String packageName, String hostAddress, int port){
+            if(newChild){
+                newChild = false;
+                notificationList.add(new CustomNotification(serviceContext,childName,packageName,hostAddress,port,CHANNEL_ID));
+            }
+        }
+
+        public static void checkChildArray(){
+            for(CustomNotification notification : notificationList){
+                if(notification.currentState != CustomNotification.State.FINISHED){
+                    return;
+                }
+            }
+            serviceContext.stopService(serviceIntent);
+            isServiceOpen = false;
+        }
+
+        /*private short[] byte2short(byte[] bData) {
             int byteArrsize = bData.length;
             short[] shortArr = new short[byteArrsize/2 - 2];
             for (int i = 0; i < byteArrsize - 4; i+=2) {
@@ -411,7 +473,7 @@ public class EbeveynDinlemeActivity extends AppCompatActivity {
             }
             return shortArr;
 
-        }
+        }*/
 
         @Nullable
         @Override
@@ -422,11 +484,10 @@ public class EbeveynDinlemeActivity extends AppCompatActivity {
         @Override
         public void onDestroy() {
             try {
-                //??????????
                 trigger = false;
                 isVoiceButtonSet = false;
                 try {
-                    socket.close();//Notifikasyona gore ayarlanacak
+                    //socket.close();//Notifikasyona gore ayarlanacak
                     timer.cancel();
                     isVoiceButtonSet = false;
                     trigger = false;
@@ -444,7 +505,11 @@ public class EbeveynDinlemeActivity extends AppCompatActivity {
             super.onDestroy();
         }
 
-        public static class CloseButton extends BroadcastReceiver{
+        public static void showErrorMsg(){
+
+        }
+
+        /*public static class CloseButton extends BroadcastReceiver{
             public CloseButton(){
                 super();
             }
@@ -479,7 +544,7 @@ public class EbeveynDinlemeActivity extends AppCompatActivity {
                         Toast.makeText(EbeveynDinlemeServis.this, "Bebek telefonunu dinleyebilmek için servisi aktifleştirmelisiniz.", Toast.LENGTH_LONG).show();
                         return;
                     }*/
-                if(socket.isClosed()){
+                /*if(socket.isClosed()){
                     Toast.makeText(context, "Bağlantınız koptu. Lütfen ebeveyn telefonu ile tekrar bağlantı kurun", Toast.LENGTH_LONG).show();
                     context.stopService(intent);
                     return;
@@ -503,7 +568,34 @@ public class EbeveynDinlemeActivity extends AppCompatActivity {
             public static int getID() {
                 return c.incrementAndGet();
             }
+        }*/
+
+        public class CloseButton extends BroadcastReceiver {
+            public CloseButton(){
+                super();
+            }
+            @Override
+            public void onReceive(Context context, Intent in) {
+                int id = in.getIntExtra("Id",0);
+                notificationList.get(id).onReceiveClose(context,in);
+            }
         }
+
+        public class ListenButton extends BroadcastReceiver{
+            public ListenButton(){
+                super();
+            }
+            @Override
+            public void onReceive(Context context, Intent in) {
+                int id = in.getIntExtra("Id",0);
+                notificationList.get(id).onReceiveListen(context, in);
+            }
+        }
+
+        public static CustomNotification getNotificationList(int id){
+            return notificationList.get(id);
+        }
+
 
     }
 

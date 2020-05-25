@@ -245,15 +245,7 @@ public class BebekMonitorActivity extends AppCompatActivity {
                         bebekMonitorActivity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(BebekMonitorActivity.this);
-                                builder.setTitle("Hata")
-                                        .setMessage("Karşı cihaz ile olan bağlantınız koptu. Lütfen Tekrar deneyin")
-                                        .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                            }
-                                        });
-                                builder.create().show();
+                                BebekServisKayitActivity.showErrorOnReturn();
                                 BebekMonitorActivity.this.finish();
                                 timer.cancel();
                             }
