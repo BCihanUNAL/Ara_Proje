@@ -68,6 +68,7 @@ public class CustomNotification {
         final Intent closeButton = new Intent(context, CloseButton.class);
         closeButton.putExtra("Id", NOTIFICATION_ID);
         closeButton.setAction("Close_Button");
+        closeButton.setAction(Long.toString(System.currentTimeMillis()));
         /*IntentFilter intentFilterClose = new IntentFilter();
         intentFilterClose.addAction("Close_Button");
         intentFilterClose.addCategory("com.example.babymonitorv2");
@@ -79,6 +80,7 @@ public class CustomNotification {
         final Intent listenButton = new Intent(context, ListenButton.class);
         listenButton.putExtra("Id",NOTIFICATION_ID);
         listenButton.setAction("Listen_Button");
+        listenButton.setAction(Long.toString(System.currentTimeMillis()));
         /*IntentFilter intentFilterListen = new IntentFilter();
         intentFilterListen.addAction("Listen_Button");
         intentFilterListen.addCategory("com.example.babymonitorv2");
@@ -133,7 +135,7 @@ public class CustomNotification {
                                     // timer tut
                                 }
                                 else{
-                                    if(isCrying && reader[reader.length - 1] != 1) {
+                                    if(isCrying) {
                                         remoteViews.setTextViewText(R.id.statusTextView, "Bebek Ağlamıyor");
                                         remoteViews.setInt(R.id.logoImageView, "setImageResource", R.mipmap.ic_baby_sleep);
                                         NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification);
@@ -162,7 +164,7 @@ public class CustomNotification {
                                     }
                                 }
                                 else{
-                                    if(isCrying && read != 0) {
+                                    if(isCrying) {
                                         remoteViews.setTextViewText(R.id.statusTextView, "Bebek Ağlamıyor");
                                         remoteViews.setInt(R.id.logoImageView, "setImageResource", R.mipmap.ic_baby_sleep);
                                         NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification);

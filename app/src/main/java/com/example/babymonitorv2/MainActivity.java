@@ -14,6 +14,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 /**
  * @author Cihan
  */
@@ -43,21 +45,46 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, BebekServisKayitActivity.class);
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                ArrayList<String> permissionList = new ArrayList<>();
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
                     if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.INTERNET}, 400);
+                        permissionList.add(Manifest.permission.INTERNET);
                     }
                     else{
                         pass++;
                     }
                     if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.RECORD_AUDIO}, 401);
+                        permissionList.add(Manifest.permission.RECORD_AUDIO);
                     }
                     else{
                         pass+=2;
                     }
+                    if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        permissionList.add(Manifest.permission.ACCESS_FINE_LOCATION);
+                    }
+                    else{
+                        pass+=4;
+                    }
+                    if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        permissionList.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                    }
+                    else{
+                        pass+=8;
+                    }
+                    if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        permissionList.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+                    }
+                    else{
+                        pass+=16;
+                    }
+
+                    if(permissionList.size() != 0){
+                        String array[] = new String[permissionList.size()];
+                        permissionList.toArray(array);
+                        ActivityCompat.requestPermissions(MainActivity.this, array, 402);
+                    }
                 }
-                if(pass == 3 || Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+                if(pass == 31 || Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
                     startActivity(intent);
                 pass = 0;
             }
@@ -67,21 +94,46 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, EbeveynServisKayitActivity.class);
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                ArrayList<String> permissionList = new ArrayList<>();
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
                     if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.INTERNET}, 400);
+                        permissionList.add(Manifest.permission.INTERNET);
                     }
                     else{
                         pass++;
                     }
                     if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.RECORD_AUDIO}, 401);
+                        permissionList.add(Manifest.permission.RECORD_AUDIO);
                     }
                     else{
                         pass+=2;
                     }
+                    if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        permissionList.add(Manifest.permission.ACCESS_FINE_LOCATION);
+                    }
+                    else{
+                        pass+=4;
+                    }
+                    if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        permissionList.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                    }
+                    else{
+                        pass+=8;
+                    }
+                    if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        permissionList.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+                    }
+                    else{
+                        pass+=16;
+                    }
+
+                    if(permissionList.size() != 0){
+                        String array[] = new String[permissionList.size()];
+                        permissionList.toArray(array);
+                        ActivityCompat.requestPermissions(MainActivity.this, array, 402);
+                    }
                 }
-                if(pass == 3 || Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+                if(pass == 31 || Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
                     startActivity(intent);
                 pass = 0;
             }
