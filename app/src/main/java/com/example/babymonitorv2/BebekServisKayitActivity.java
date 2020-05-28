@@ -103,13 +103,6 @@ public class BebekServisKayitActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == REQUEST_CODE){
-            /*if(isRegistrationEnabled) {
-                nsdManager.unregisterService(registrationListener);
-                isRegistrationEnabled = false;
-            }*/
-            /*Intent intent = getIntent();
-            finish();
-            startActivity(intent);*/
             if(showError) {
                 AlertDialog alertDialog = new AlertDialog.Builder(this)
                         .setTitle("Hata")

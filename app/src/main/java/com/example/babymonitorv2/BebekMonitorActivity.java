@@ -145,8 +145,6 @@ public class BebekMonitorActivity extends AppCompatActivity {
             }
         }, "AudioRecorder Thread");
         recordingThread.start();
-        //recordingThread = new Recorder();
-        //recordingThread.doInBackground();
     }
 
     private byte[] short2byte(short[] sData) {
@@ -179,12 +177,11 @@ public class BebekMonitorActivity extends AppCompatActivity {
                 float MFCC[] = new float[doubleMFCC.length * doubleMFCC[0].length];
                 for (int i = 0; i < doubleMFCC.length; i++) {
                     for (int j = 0; j < doubleMFCC[0].length; j++) {
-                        MFCC[i * doubleMFCC[0].length + j] = (float) (doubleMFCC[i][j]); // duzelt bunlari
+                        MFCC[i * doubleMFCC[0].length + j] = (float) (doubleMFCC[i][j]);
                     }
                 }
                 tensorFlowInferenceInterface.feed(INPUT_NODE, MFCC, 1, INPUT_SHAPE[0]);
 
-                //tensorFlowInferenceInterface.fillNodeFloat(INPUT_NODE, INPUT_SHAPE, MFCC);
                 tensorFlowInferenceInterface.run(new String[]{OUTPUT_NODE});
                 float results[] = {0, 0};
                 tensorFlowInferenceInterface.fetch(OUTPUT_NODE, results);
@@ -217,8 +214,6 @@ public class BebekMonitorActivity extends AppCompatActivity {
             }
         });
         detectionThread.start();
-        //Detector detectionThread = new Detector();
-        //detectionThread.doInBackground();
     }
 
     private void writeDataToBuffer() throws IOException{
@@ -256,7 +251,6 @@ public class BebekMonitorActivity extends AppCompatActivity {
         }, 1000, 3000);
 
         while (true) {
-            Log.d(TAG, "run: inside");
             if(!socket.isConnected()){
                 break;
             }
@@ -266,18 +260,10 @@ public class BebekMonitorActivity extends AppCompatActivity {
                     b = dataInputStream.readByte();
                 }
                 recorder.read(sData, 0, sData.length);
-                /*double sum = 0.0;
-                for(int i = 0; i < sData.length; i++){
-                    double sample = ((double)sData[i])/32768.0;
-                    sum += (sample*sample);
-                }
-                double decibel = 20.0 * Math.log10(Math.sqrt(2.0 * sum / sData.length));*/
 
                 byte bData[] = short2byte(sData);
-                // gelen ses verisini burada isleyip mesaji don
 
                 if(isListening) {
-
                     if(b == 1){
                         isListening = false;
                         bData[bData.length - 1] = 1;
@@ -323,7 +309,6 @@ public class BebekMonitorActivity extends AppCompatActivity {
     }
 
     private void stopRecording() {
-        // stops the recording activity
         if (null != recorder) {
             isListening = false;
             isRecording = false;
@@ -360,65 +345,5 @@ public class BebekMonitorActivity extends AppCompatActivity {
         super.onDestroy();
 
     }
-
-    class Recorder extends AsyncTask<Void, Void, Void>{
-        public Recorder(){
-            super();
-        }
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            try {
-                writeDataToBuffer();
-            }
-            catch (Exception e){
-                e.printStackTrace();
-            }
-            return null;
-        }
-    }
-
-    class Detector extends AsyncTask<Void, Void, Void>{
-        public Detector(){
-            super();
-        }
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            Log.d(TAG, "run: isleniyor");
-            double doubleMFCC[][] = FeatureExtraction.process(processData);
-            Log.d(TAG, "run: " + processData[1] + " " + processData[2] + " " + processData[3] + " " + processData[4] + " " + processData[5] + " " + processData[6] + " " + processData[7] + " " + processData[8] + " " + processData[9] + " " + processData[10] + " ");
-            float MFCC[] = new float[doubleMFCC.length * doubleMFCC[0].length];
-            for (int i = 0; i < doubleMFCC.length; i++) {
-                for (int j = 0; j < doubleMFCC[0].length; j++) {
-                    MFCC[i * doubleMFCC[0].length + j] = (float) (doubleMFCC[i][j]); // duzelt bunlari
-                }
-            }
-            tensorFlowInferenceInterface.feed(INPUT_NODE, MFCC, 1, 5603);
-
-            tensorFlowInferenceInterface.run(new String[]{OUTPUT_NODE});
-            float results[] = {0, 0};
-            tensorFlowInferenceInterface.fetch(OUTPUT_NODE, results);
-            Log.d(TAG, "run: "+results[0]+" "+results[1]);
-            if(results[1] > results[0]){
-                isCrying = true;
-                Log.d(TAG, "run: bebek agliyor ");
-            }
-            else{
-                Log.d(TAG, "run: bebek aglamiyor ");
-                isCrying = false;
-            }
-            return null;
-        }
-    }
-
 
 }

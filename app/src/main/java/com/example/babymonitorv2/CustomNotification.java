@@ -1,21 +1,16 @@
 package com.example.babymonitorv2;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.media.MediaPlayer;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Vibrator;
 import android.util.Log;
-import android.view.WindowManager;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
@@ -47,11 +42,12 @@ public class CustomNotification {
     private Context context;
     private boolean isCrying;
     private RemoteViews remoteViews;
+    private Uri soundResource;
     private static final String TAG = "CustomNotification";
     private final static AtomicInteger atomicInt = new AtomicInteger(0);
     private final static  AtomicInteger atomicErrorInt = new AtomicInteger(50000);
 
-    public CustomNotification(final Context context, String childName, String packageName, String hostName, int port, String CHANNEL_ID){
+    public CustomNotification(final Context context, String childName, final String packageName, String hostName, int port, String CHANNEL_ID, String soundUri){
         try {
             this.socket = new Socket(hostName, port);
             this.context = context;
@@ -59,6 +55,10 @@ public class CustomNotification {
             this.CHANNEL_ID = CHANNEL_ID;
             dataInputStream = new DataInputStream(socket.getInputStream());
             dataOutputStream = new DataOutputStream(socket.getOutputStream());
+            if(soundUri == null)
+                soundResource = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            else
+                soundResource = Uri.parse(soundUri);
         }
         catch (Exception e){
             e.printStackTrace();
@@ -69,10 +69,6 @@ public class CustomNotification {
         closeButton.putExtra("Id", NOTIFICATION_ID);
         closeButton.setAction("Close_Button");
         closeButton.setAction(Long.toString(System.currentTimeMillis()));
-        /*IntentFilter intentFilterClose = new IntentFilter();
-        intentFilterClose.addAction("Close_Button");
-        intentFilterClose.addCategory("com.example.babymonitorv2");
-        context.registerReceiver(new CloseButton(),intentFilterClose);*/
         closeButton.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
         PendingIntent pendingCloseIntent = PendingIntent.getBroadcast(context, 0, closeButton, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -81,10 +77,6 @@ public class CustomNotification {
         listenButton.putExtra("Id",NOTIFICATION_ID);
         listenButton.setAction("Listen_Button");
         listenButton.setAction(Long.toString(System.currentTimeMillis()));
-        /*IntentFilter intentFilterListen = new IntentFilter();
-        intentFilterListen.addAction("Listen_Button");
-        intentFilterListen.addCategory("com.example.babymonitorv2");
-        context.registerReceiver(new ListenButton(),intentFilterListen);*/
         listenButton.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
         PendingIntent pendingListenIntent = PendingIntent.getBroadcast(context, 0, listenButton, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -96,7 +88,7 @@ public class CustomNotification {
         remoteViews.setTextViewText(R.id.titleTextView, childName);
 
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(context,CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_baby_baby)
+                .setSmallIcon(R.drawable.ic_baby_notification_final)
                 .setCustomContentView(remoteViews)
                 .setCustomBigContentView(remoteViews);
 
@@ -127,8 +119,10 @@ public class CustomNotification {
                                         remoteViews.setTextViewText(R.id.statusTextView, "Bebek Ağlıyor");
                                         remoteViews.setInt(R.id.logoImageView, "setImageResource", R.mipmap.ic_baby_cry);
                                         NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification);
-                                        Vibrator vibrator = (Vibrator)context.getSystemService(VIBRATOR_SERVICE);
-                                        vibrator.vibrate(2000);
+                                        MediaPlayer mp = MediaPlayer.create(context, soundResource);
+                                        mp.start();
+                                        /*Vibrator vibrator = (Vibrator)context.getSystemService(VIBRATOR_SERVICE);
+                                        vibrator.vibrate(2000);*/
                                         isCrying = true;
 
                                     }
@@ -158,8 +152,11 @@ public class CustomNotification {
                                         remoteViews.setTextViewText(R.id.statusTextView, "Bebek Ağlıyor");
                                         remoteViews.setInt(R.id.logoImageView, "setImageResource", R.mipmap.ic_baby_cry);
                                         NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification);
-                                        Vibrator vibrator = (Vibrator)context.getSystemService(VIBRATOR_SERVICE);
-                                        vibrator.vibrate(2000);
+                                        MediaPlayer mp = MediaPlayer.create(context, soundResource);
+                                        mp.start();
+                                        
+                                        /*Vibrator vibrator = (Vibrator)context.getSystemService(VIBRATOR_SERVICE);
+                                        vibrator.vibrate(2000);*/
                                         isCrying = true;
                                     }
                                 }
@@ -234,22 +231,6 @@ public class CustomNotification {
                     e.printStackTrace();
                     //Exception olusursa bitir.
                     //Current Activity değil, Baska bir activityde kostur
-
-                    /*context.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(currentActivity);
-                            builder.setTitle("Hata")
-                                    .setMessage("Karşı cihaz ile olan bağlantınız koptu. Lütfen Tekrar deneyin")
-                                    .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                        }
-                                    });
-                            builder.create().show();
-                            //currentActivity.finish();
-                        }
-                    });*/
                     try {
                         Log.d(TAG, "run: closing socket");
                         NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID);
@@ -265,10 +246,6 @@ public class CustomNotification {
                 }
             }
         },1000, 3000);
-    }
-
-    public Notification getNotification(){
-        return notification;
     }
 
     public int getNOTIFICATION_ID(){
@@ -323,10 +300,6 @@ public class CustomNotification {
             }
             return;
         }
-                    /*if(!isServiceOpen){
-                        Toast.makeText(EbeveynDinlemeServis.this, "Bebek telefonunu dinleyebilmek için servisi aktifleştirmelisiniz.", Toast.LENGTH_LONG).show();
-                        return;
-                    }*/
         if(socket.isClosed()){
             Toast.makeText(context, "Bağlantınız koptu. Lütfen ebeveyn telefonu ile tekrar bağlantı kurun", Toast.LENGTH_LONG).show();
             NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID);
@@ -349,6 +322,4 @@ public class CustomNotification {
             e.printStackTrace();
         }
     }
-
-
 }

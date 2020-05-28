@@ -2,11 +2,13 @@ package com.example.babymonitorv2;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
 
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.net.wifi.WifiManager;
@@ -35,6 +37,7 @@ public class EbeveynServisKayitActivity extends AppCompatActivity {
     private static NsdManager.DiscoveryListener discoveryListener;
     private static boolean isDiscoveryEnabled = false;
     private static NsdManager nsdManager;
+    private static Uri soundResource;
     private final int REQUEST_CODE = 801;
 
     @Override
@@ -66,8 +69,10 @@ public class EbeveynServisKayitActivity extends AppCompatActivity {
             serviceInfoHashMap = new HashMap<>();
             final EditText ebeveynPinCode = findViewById(R.id.ebeveynKayitPinEditText);
             Button ebeveynBaglanti = findViewById(R.id.ebeveynKayitServisBaglantiButton);
+            Button ebeveynSes = findViewById(R.id.ebeveynKayitServisSesButton);
             discoverService();
             Log.d(TAG, "onCreate: basliyor");
+
             ebeveynBaglanti.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -85,8 +90,6 @@ public class EbeveynServisKayitActivity extends AppCompatActivity {
                                     String serviceName = nsdServiceInfo.getServiceName();
                                     serviceName = serviceName.replace("\\\\032", " ");
                                     serviceName = serviceName.replace("\\032", " ");
-                                    //mediaSocket = new Socket(nsdServiceInfo.getHost().getHostAddress(), nsdServiceInfo.getPort());
-                                    EbeveynDinlemeActivity.initBooleanVariables();
                                     nsdManager.stopServiceDiscovery(discoveryListener);
                                     isDiscoveryEnabled = false;
                                     Intent intent = new Intent(EbeveynServisKayitActivity.this, EbeveynDinlemeActivity.class);
@@ -94,6 +97,11 @@ public class EbeveynServisKayitActivity extends AppCompatActivity {
                                     intent.putExtra("ChildName",((EditText)findViewById(R.id.ebeveynKayitIsimEditText)).getText().toString());
                                     intent.putExtra("HostAddress",nsdServiceInfo.getHost().getHostAddress());
                                     intent.putExtra("Port",nsdServiceInfo.getPort());
+                                    String str = null;
+                                    if(soundResource != null)
+                                        str = soundResource.toString();
+                                    intent.putExtra("SoundUri",str);
+                                    EbeveynDinlemeActivity.newChild = true;
                                     startActivityForResult(intent, REQUEST_CODE);
 
                                    // Log.d(TAG, "onClick: Socket connected " + mediaSocket.getPort() + " " + mediaSocket.getInetAddress().toString());
@@ -105,6 +113,14 @@ public class EbeveynServisKayitActivity extends AppCompatActivity {
                         }
                     });
                     thread.start();
+                }
+            });
+
+            ebeveynSes.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    DialogFragment newFragment = SesSecimFragment.getInstance();
+                    newFragment.show(getSupportFragmentManager(),"dialog");
                 }
             });
         }
@@ -145,7 +161,6 @@ public class EbeveynServisKayitActivity extends AppCompatActivity {
                 }
                 else{
                     if(serviceInfo.getServiceName().contains("YtuceBabyMonitor")){
-                        // Resolvelistener'i sadece bir kere tanimla
                         resolveListener = new NsdManager.ResolveListener() {
                             @Override
                             public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
@@ -178,6 +193,10 @@ public class EbeveynServisKayitActivity extends AppCompatActivity {
         isDiscoveryEnabled = true;
     }
 
+    public static void setSoundFile(Uri soundFile){
+        soundResource = soundFile;
+    }
+
 
     @Override
     protected void onDestroy() {
@@ -194,9 +213,6 @@ public class EbeveynServisKayitActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == REQUEST_CODE){
-            /*Intent intent = getIntent();
-            finish();
-            startActivity(intent);*/
             recreate();
             Log.d(TAG, "onActivityResult: intent" + isDiscoveryEnabled);
         }

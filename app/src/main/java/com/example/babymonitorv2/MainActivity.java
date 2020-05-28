@@ -6,8 +6,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -44,6 +46,11 @@ public class MainActivity extends AppCompatActivity {
         bebekButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                WifiManager wifiManager = (WifiManager)getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                if(!wifiManager.isWifiEnabled()){
+                    Toast.makeText(MainActivity.this, "Lütfen Wifi Bağlantınızı Kontrol Edin.",Toast.LENGTH_LONG).show();
+                    return;
+                }
                 Intent intent = new Intent(MainActivity.this, BebekServisKayitActivity.class);
                 ArrayList<String> permissionList = new ArrayList<>();
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
