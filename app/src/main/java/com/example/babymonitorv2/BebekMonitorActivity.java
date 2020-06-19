@@ -18,6 +18,7 @@ import android.os.Handler;
 import android.os.PersistableBundle;
 import android.os.StrictMode;
 import android.provider.ContactsContract;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -43,8 +44,8 @@ public class BebekMonitorActivity extends AppCompatActivity {
     }
 
     private static final String MODEL_FILE = "file:///android_asset/baby_model.pb";
-    private static final String INPUT_NODE = "flatten_input";
-    private static final String OUTPUT_NODE = "output/Softmax";//
+    private static final String INPUT_NODE = "input_1";
+    private static final String OUTPUT_NODE = "sequential/output/Softmax";//
     private static final String TAG = "BebekMonitorActivity";
     private static Socket socket;
     private static final int RECORDER_SAMPLERATE = 16000;
@@ -58,10 +59,11 @@ public class BebekMonitorActivity extends AppCompatActivity {
     private static Timer timer;
     public static short processData[];
     private static int offset;
-    private static int[] INPUT_SHAPE = {13*157};
+    private static int[] INPUT_SHAPE = {13 * 157};
     private boolean isCrying = false;
     private static boolean isCreated = false;
     private static TensorFlowInferenceInterface tensorFlowInferenceInterface;
+    private static TelephonyManager telephonyManager;
 
     @Override
     public boolean onSupportNavigateUp() {
@@ -103,6 +105,7 @@ public class BebekMonitorActivity extends AppCompatActivity {
         }
         if(!isCreated) {
             isCreated = true;
+            telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
                     .permitAll().build();
             StrictMode.setThreadPolicy(policy);
@@ -186,7 +189,7 @@ public class BebekMonitorActivity extends AppCompatActivity {
                 float results[] = {0, 0};
                 tensorFlowInferenceInterface.fetch(OUTPUT_NODE, results);
                 if(results[1] > results[0]){
-                    Log.d(TAG, "run: bebek agliyor " + results[0] + " " + results[1]);
+                    Log.d(TAG, "run: bebek agliyor " + results[0] + " " + results[1] + " " + isCrying);
                     if(!isCrying) {
                         isCrying = true;
                         bebekMonitorActivity.runOnUiThread(new Runnable() {
@@ -199,7 +202,7 @@ public class BebekMonitorActivity extends AppCompatActivity {
                     }
                 }
                 else{
-                    Log.d(TAG, "run: bebek aglamiyor " + results[0] + " " + results[1]);
+                    Log.d(TAG, "run: bebek aglamiyor " + results[0] + " " + results[1] + " " + isCrying);
                     if(isCrying) {
                         isCrying = false;
                         bebekMonitorActivity.runOnUiThread(new Runnable() {
@@ -264,12 +267,12 @@ public class BebekMonitorActivity extends AppCompatActivity {
                 byte bData[] = short2byte(sData);
 
                 if(isListening) {
-                    if(b == 1){
+                    if(isCrying){
+                        bData[bData.length - 2] = 3;
+                    }
+                    if(b == 1 || telephonyManager.getCallState() != TelephonyManager.CALL_STATE_IDLE){
                         isListening = false;
                         bData[bData.length - 1] = 1;
-                        if(isCrying){
-                            bData[bData.length - 2] = 3;
-                        }
                     }
                     dataOutputStream.write(bData, 0, bData.length);
                 }
@@ -317,6 +320,14 @@ public class BebekMonitorActivity extends AppCompatActivity {
             recorder = null;
             recordingThread = null;
         }
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        isListening = savedInstanceState.getBoolean("islistening");
+        isRecording = savedInstanceState.getBoolean("isrecording");
+        isCrying = savedInstanceState.getBoolean("iscrying");
     }
 
     @Override

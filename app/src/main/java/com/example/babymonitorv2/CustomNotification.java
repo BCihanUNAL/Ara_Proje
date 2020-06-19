@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -24,6 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import static android.content.Context.AUDIO_SERVICE;
 import static android.content.Context.VIBRATOR_SERVICE;
 
 public class CustomNotification {
@@ -43,9 +45,10 @@ public class CustomNotification {
     private boolean isCrying;
     private RemoteViews remoteViews;
     private Uri soundResource;
-    private static final String TAG = "CustomNotification";
+    private final String TAG = "CustomNotification";
     private final static AtomicInteger atomicInt = new AtomicInteger(0);
     private final static  AtomicInteger atomicErrorInt = new AtomicInteger(50000);
+    private static boolean preventPlay;
 
     public CustomNotification(final Context context, String childName, final String packageName, String hostName, int port, String CHANNEL_ID, String soundUri){
         try {
@@ -90,7 +93,9 @@ public class CustomNotification {
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(context,CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_baby_notification_final)
                 .setCustomContentView(remoteViews)
-                .setCustomBigContentView(remoteViews);
+                .setCustomBigContentView(remoteViews)
+                .setCategory(Notification.CATEGORY_SERVICE)
+                .setPriority(Notification.PRIORITY_DEFAULT);
 
         notification = builder.build();
 
@@ -102,9 +107,10 @@ public class CustomNotification {
 
         Thread listen = new Thread(new Runnable() {
             WifiManager wifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
-            AudioStreamer audioStreamer = AudioStreamer.getInstance();
+            AudioStreamer audioStreamer = new AudioStreamer();
             @Override
             public void run() {
+                MediaPlayer mp = null;
                 while (true) {
                     try {
                         if(dataInputStream.available() > 0) {
@@ -119,10 +125,17 @@ public class CustomNotification {
                                         remoteViews.setTextViewText(R.id.statusTextView, "Bebek Ağlıyor");
                                         remoteViews.setInt(R.id.logoImageView, "setImageResource", R.mipmap.ic_baby_cry);
                                         NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification);
-                                        MediaPlayer mp = MediaPlayer.create(context, soundResource);
-                                        mp.start();
-                                        /*Vibrator vibrator = (Vibrator)context.getSystemService(VIBRATOR_SERVICE);
-                                        vibrator.vibrate(2000);*/
+                                        if(mp != null && mp.isPlaying()){
+                                            mp.stop();
+                                        }
+                                        if(soundResource != null) {
+                                            mp = MediaPlayer.create(context, soundResource);
+                                            mp.start();
+                                        }
+                                        else {
+                                            Vibrator vibrator = (Vibrator)context.getSystemService(VIBRATOR_SERVICE);
+                                            vibrator.vibrate(2000);
+                                        }
                                         isCrying = true;
 
                                     }
@@ -139,6 +152,7 @@ public class CustomNotification {
                                 if(reader[reader.length - 1] == 1){
                                     isVoiceButtonSet = false;
                                     trigger = false;
+                                    preventPlay = false;
                                     remoteViews.setInt(R.id.listenToggleButton,"setBackgroundResource",R.drawable.play_button);
                                     NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification);
                                     audioStreamer.stopPlaying();
@@ -152,11 +166,17 @@ public class CustomNotification {
                                         remoteViews.setTextViewText(R.id.statusTextView, "Bebek Ağlıyor");
                                         remoteViews.setInt(R.id.logoImageView, "setImageResource", R.mipmap.ic_baby_cry);
                                         NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification);
-                                        MediaPlayer mp = MediaPlayer.create(context, soundResource);
-                                        mp.start();
-                                        
-                                        /*Vibrator vibrator = (Vibrator)context.getSystemService(VIBRATOR_SERVICE);
-                                        vibrator.vibrate(2000);*/
+                                        if(mp != null && mp.isPlaying()){
+                                            mp.stop();
+                                        }
+                                        if(soundResource != null) {
+                                            mp = MediaPlayer.create(context, soundResource);
+                                            mp.start();
+                                        }
+                                        else {
+                                            Vibrator vibrator = (Vibrator) context.getSystemService(VIBRATOR_SERVICE);
+                                            vibrator.vibrate(2000);
+                                        }
                                         isCrying = true;
                                     }
                                 }
@@ -171,6 +191,7 @@ public class CustomNotification {
                                 if(read == 0) {
                                     isVoiceButtonSet = true;
                                     trigger = false;
+                                    preventPlay = true;
                                     remoteViews.setInt(R.id.listenToggleButton,"setBackgroundResource",R.drawable.pause_button);
                                     NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification);
                                     audioStreamer.startPlaying();
@@ -199,7 +220,6 @@ public class CustomNotification {
             }
         });
         listen.start();
-
         currentState = State.RUNNING;
     }
 
@@ -216,7 +236,6 @@ public class CustomNotification {
             shortArr[i/2] |= (val << 8);
         }
         return shortArr;
-
     }
 
     private void createTimer(){
@@ -237,7 +256,7 @@ public class CustomNotification {
                         currentState = State.FINISHED;
                         timer.cancel();
                         socket.close();
-                        EbeveynDinlemeActivity.EbeveynDinlemeServis.checkChildArray();
+                        EbeveynDinlemeServis.checkChildArray();
                         createErrorNotification();
                     }
                     catch (Exception ex){
@@ -262,9 +281,13 @@ public class CustomNotification {
         return atomicErrorInt.getAndIncrement();
     }
 
+    public static void setAtomicIntToZero(){
+        atomicInt.set(0);
+    }
+
     private void createErrorNotification(){
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(context,CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_baby_baby)
+                .setSmallIcon(R.drawable.ic_baby_notification_final)
                 .setContentTitle("Baby Monitor - Hata")
                 .setContentText(childName + " isimli çocuğu dinleyen cihaz ile bağlantı koptu.")
                 .setPriority(Notification.PRIORITY_DEFAULT);
@@ -272,8 +295,8 @@ public class CustomNotification {
         NotificationManagerCompat.from(context).notify(getErrorID(), builder.build());
     }
 
-    public void onReceiveClose(Context context, Intent in){
-        if(isVoiceButtonSet){
+    public void onReceiveClose(Context context, Intent in, boolean forceClose){
+        if(isVoiceButtonSet && !forceClose){
             Toast.makeText(context, "Lütfen dinleme yapmayı bırakın", Toast.LENGTH_LONG).show();
             return;
         }
@@ -282,7 +305,7 @@ public class CustomNotification {
             socket.close();
             timer.cancel();
             currentState = State.FINISHED;
-            EbeveynDinlemeActivity.EbeveynDinlemeServis.checkChildArray();
+            EbeveynDinlemeServis.checkChildArray();
         }
         catch (Exception e){
             e.printStackTrace();
@@ -300,6 +323,12 @@ public class CustomNotification {
             }
             return;
         }
+        if(preventPlay){
+            if(!isVoiceButtonSet){
+                    Toast.makeText(context, "Belirli bir anda sadece bir bebek cihazı dinleyebilirsiniz.",Toast.LENGTH_LONG).show();
+                    return;
+            }
+        }
         if(socket.isClosed()){
             Toast.makeText(context, "Bağlantınız koptu. Lütfen ebeveyn telefonu ile tekrar bağlantı kurun", Toast.LENGTH_LONG).show();
             NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID);
@@ -307,7 +336,7 @@ public class CustomNotification {
             currentState = State.FINISHED;
             createErrorNotification();
 
-            EbeveynDinlemeActivity.EbeveynDinlemeServis.checkChildArray();
+            EbeveynDinlemeServis.checkChildArray();
             return;
         }
         trigger = true;

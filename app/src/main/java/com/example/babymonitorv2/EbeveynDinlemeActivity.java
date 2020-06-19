@@ -26,7 +26,7 @@ public class EbeveynDinlemeActivity extends AppCompatActivity {
     private static final String TAG = "EbeveynDinlemeActivity";
     public static final String CHANNEL_ID = "EbeveynServiceChannel";
 
-    private static boolean isServiceOpen = false;
+    public static boolean isServiceOpen = false;
     public static boolean newChild;
     private static Intent intent;
     private static String childName;
@@ -45,7 +45,6 @@ public class EbeveynDinlemeActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-
         if(!isServiceOpen) {
             if(newChild) {
                 isServiceOpen = true;
@@ -61,13 +60,17 @@ public class EbeveynDinlemeActivity extends AppCompatActivity {
                 intent.putExtra("HostAddress",getIntent().getStringExtra("HostAddress"));
                 intent.putExtra("Port",getIntent().getIntExtra("Port",0));
                 intent.putExtra("SoundUri",getIntent().getStringExtra("SoundUri"));
+                intent.putExtra("ChildName", childName);
                 startService(intent);
+                newChild = false;
             }
         }
-        else{
-            EbeveynDinlemeServis.addNewChild(getPackageName(), getIntent().getStringExtra("HostAddress"), getIntent().getIntExtra("Port",0),getIntent().getStringExtra("SoundUri"));
+        else {
+            if (newChild) {
+                newChild = false;
+                EbeveynDinlemeServis.addNewChild(getPackageName(), getIntent().getStringExtra("HostAddress"), getIntent().getIntExtra("Port", 0), getIntent().getStringExtra("SoundUri"), getIntent().getStringExtra("ChildName"));
+            }
         }
-
     }
 
 
@@ -115,11 +118,13 @@ public class EbeveynDinlemeActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        if(!isChangingConfigurations())
+            stopService(intent);
         super.onDestroy();
     }
 
 
-    public static class EbeveynDinlemeServis extends Service {
+    /*public static class EbeveynDinlemeServis extends Service {
         private static final String TAG = "EbeveynDinlemeServis";
         public static final String CHANNEL_ID = "EbeveynServiceChannel";
         private static Intent serviceIntent;
@@ -191,5 +196,5 @@ public class EbeveynDinlemeActivity extends AppCompatActivity {
         public static CustomNotification getNotificationList(int id){
             return notificationList.get(id);
         }
-    }
+    }*/
 }

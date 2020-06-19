@@ -84,6 +84,13 @@ public class MainActivity extends AppCompatActivity {
                     else{
                         pass+=16;
                     }
+                    if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                        permissionList.add(Manifest.permission.READ_PHONE_STATE);
+                    }
+                    else{
+                        pass+=32;
+                    }
+
 
                     if(permissionList.size() != 0){
                         String array[] = new String[permissionList.size()];
@@ -91,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
                         ActivityCompat.requestPermissions(MainActivity.this, array, 402);
                     }
                 }
-                if(pass == 31 || Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
+                if(pass == 63 || Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
                     startActivity(intent);
                 pass = 0;
             }
@@ -133,6 +140,13 @@ public class MainActivity extends AppCompatActivity {
                     else{
                         pass+=16;
                     }
+                    if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                        permissionList.add(Manifest.permission.READ_PHONE_STATE);
+                    }
+                    else{
+                        pass+=32;
+                    }
+
 
                     if(permissionList.size() != 0){
                         String array[] = new String[permissionList.size()];
@@ -140,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
                         ActivityCompat.requestPermissions(MainActivity.this, array, 402);
                     }
                 }
-                if(pass == 31 || Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
+                if(pass == 63 || Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
                     startActivity(intent);
                 pass = 0;
             }

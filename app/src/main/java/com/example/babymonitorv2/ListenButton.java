@@ -14,6 +14,6 @@ public class ListenButton extends BroadcastReceiver {
     public void onReceive(Context context, Intent in) {
         int id = in.getIntExtra("Id",0);
         Log.d(TAG, "onReceive: Id = " + id);
-        EbeveynDinlemeActivity.EbeveynDinlemeServis.getNotificationList(id).onReceiveListen(context, in);
+        EbeveynDinlemeServis.getNotificationList(id).onReceiveListen(context, in);
     }
 }

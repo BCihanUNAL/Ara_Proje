@@ -69,7 +69,7 @@ public class BebekServisKayitActivity extends AppCompatActivity {
             try {
                 Log.d(TAG, "onCreate: girdi");
                 final ArrayList<Integer> pinList = checkPinCode();
-                Thread.sleep(400);
+                Thread.sleep(500);
                 nsdManager.stopServiceDiscovery(discoveryListener);
                 final int pinCode = createPinCode(pinList);
                 sifreTv.setText(Integer.toString(pinCode));

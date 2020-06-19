@@ -23,6 +23,10 @@
     <uses-permission
         android:name="android.permission.VIBRATE"
         android:required="true"/>
+    <uses-permission
+        android:name="android.permission.READ_PHONE_STATE"
+        android:required="true"/>
+
 
 
     <application
@@ -45,7 +49,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".EbeveynDinlemeActivity$EbeveynDinlemeServis"/>
+        <service android:name=".EbeveynDinlemeServis"/>
         <receiver android:name=".CloseButton">
             <intent-filter>
                 <action android:name="Close_Button" />

@@ -15,11 +15,10 @@ import android.util.Log;
 public class AudioStreamer {
     private static AudioStreamer instance = null;
     private static final String TAG = "AudioStreamer";
-    private static Activity caller;
     private AudioTrack audioTrack;
-    private static boolean isPlaying = false;
+    private boolean isPlaying = false; //bu statikti
 
-    private AudioStreamer(){
+    public AudioStreamer(){
         //caller = activity;
         Log.i(TAG, "Setting up stream");
 
@@ -36,6 +35,7 @@ public class AudioStreamer {
                 AudioTrack.MODE_STREAM);
 
         audioTrack.setVolume(1.0f);
+
         //caller.setVolumeControlStream(AudioAttributes.USAGE_VOICE_COMMUNICATION);
     }
 

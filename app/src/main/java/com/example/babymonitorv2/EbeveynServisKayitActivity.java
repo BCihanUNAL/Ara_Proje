@@ -88,8 +88,6 @@ public class EbeveynServisKayitActivity extends AppCompatActivity {
                                 try {
                                     NsdServiceInfo nsdServiceInfo = serviceInfoHashMap.get(Integer.parseInt(ebeveynPinCode.getText().toString()));
                                     String serviceName = nsdServiceInfo.getServiceName();
-                                    serviceName = serviceName.replace("\\\\032", " ");
-                                    serviceName = serviceName.replace("\\032", " ");
                                     nsdManager.stopServiceDiscovery(discoveryListener);
                                     isDiscoveryEnabled = false;
                                     Intent intent = new Intent(EbeveynServisKayitActivity.this, EbeveynDinlemeActivity.class);

@@ -39,7 +39,7 @@ public class SesSecimFragment extends DialogFragment {
             ringtoneURIList.add(ringtoneURI);
             // Do something with the title and the URI of ringtone
         }
-        String[] titleArray = new String[titleList.size()];
+        final String[] titleArray = new String[titleList.size()];
         final Uri[] uriArray = new Uri[ringtoneURIList.size()];
         titleList.toArray(titleArray);
         ringtoneURIList.toArray(uriArray);
@@ -61,7 +61,10 @@ public class SesSecimFragment extends DialogFragment {
                                       .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
                                           @Override
                                           public void onClick(DialogInterface dialog, int which) {
-                                                EbeveynServisKayitActivity.setSoundFile(uriArray[position]);
+                                                if(titleArray.length != 0)
+                                                    EbeveynServisKayitActivity.setSoundFile(uriArray[position]);
+                                                else
+                                                    EbeveynServisKayitActivity.setSoundFile(null);
                                                 dialog.dismiss();
                                           }
                                       })
