@@ -1,3 +1,43 @@
+'''
+OC Volume - Java Speech Recognition Engine
+Copyright (c) 2002-2004, OrangeCow organization
+All rights reserved.
+Redistribution and use in source and binary forms,
+with or without modification, are permitted provided
+that the following conditions are met:
+* Redistributions of source code must retain the
+  above copyright notice, this list of conditions
+  and the following disclaimer.
+* Redistributions in binary form must reproduce the
+  above copyright notice, this list of conditions
+  and the following disclaimer in the documentation
+  and/or other materials provided with the
+  distribution.
+* Neither the name of the OrangeCow organization
+  nor the names of its contributors may be used to
+  endorse or promote products derived from this
+  software without specific prior written
+  permission.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS
+AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
+WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
+THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+Contact information:
+Please visit http://ocvolume.sourceforge.net.
+'''
+
 import librosa
 import numpy as np
 import pandas as pd
@@ -254,7 +294,6 @@ def process(inputSignal):
 
 df = pd.read_csv(r'D:\\Odevler_Dersler\\Baby_Dataset\\filelist.csv')
 df.set_index('fname', inplace=True)
-classes = list(np.unique(df.label))
 X = []
 y = np.array([])
 mfccs = np.array([])
@@ -289,14 +328,11 @@ for f in df.index:
 
 mfccs = np.array(mfccss)
 
-X_train, X_test, y_train, y_test = train_test_split(mfccs, y, test_size=0.4, random_state=42)
-
-print(X_train)
+X_train, X_test, y_train, y_test = train_test_split(mfccs, y, test_size=0.3, random_state=42)
 
 m = tf.compat.v1.keras.models.Sequential()
 
-m.add(tf.compat.v1.keras.layers.Flatten(input_shape=(2041,)))
-m.add(tf.compat.v1.keras.layers.Dense(157, activation=tf.compat.v1.nn.tanh))
+m.add(tf.compat.v1.keras.layers.Dense(157, activation=tf.compat.v1.nn.tanh, batch_size=157))
 m.add(tf.compat.v1.keras.layers.Dense(128, activation=tf.compat.v1.nn.tanh))
 m.add(tf.compat.v1.keras.layers.Dense(128, activation=tf.compat.v1.nn.tanh))
 m.add(tf.compat.v1.keras.layers.Dense(2, activation=tf.compat.v1.nn.softmax, name='output'))
@@ -306,8 +342,13 @@ m.compile(optimizer='adam',
 
 from keras import backend as K
 
-m.fit(X_train, y_train, epochs=24)
+m.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=25)
 
+m.summary()
+
+scores = m.evaluate(X_test, y_test)
+print("\nLoss: %.2f%%" % (scores[0]*100))
+print("Accuracy: %.2f%%" % (scores[1]*100))
 frozen_graph = freeze_session(K.get_session(),
                               output_names=[out.op.name for out in m.outputs])
 
