@@ -16,10 +16,9 @@ public class AudioStreamer {
     private static AudioStreamer instance = null;
     private static final String TAG = "AudioStreamer";
     private AudioTrack audioTrack;
-    private boolean isPlaying = false; //bu statikti
+    private boolean isPlaying = false;
 
     public AudioStreamer(){
-        //caller = activity;
         Log.i(TAG, "Setting up stream");
 
         final int frequency = 16000;

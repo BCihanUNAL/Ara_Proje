@@ -64,6 +64,7 @@ public class BebekMonitorActivity extends AppCompatActivity {
     private static boolean isCreated = false;
     private static TensorFlowInferenceInterface tensorFlowInferenceInterface;
     private static TelephonyManager telephonyManager;
+    private static int counter = 0;
 
     @Override
     public boolean onSupportNavigateUp() {
@@ -189,7 +190,8 @@ public class BebekMonitorActivity extends AppCompatActivity {
                 float results[] = {0, 0};
                 tensorFlowInferenceInterface.fetch(OUTPUT_NODE, results);
                 if(results[1] > results[0]){
-                    Log.d(TAG, "run: bebek agliyor " + results[0] + " " + results[1] + " " + isCrying);
+                    Log.d(TAG, "run: bebek agliyor counter: " + counter + " " + results[0] + " " + results[1] + " " + isCrying);
+                    counter++;
                     if(!isCrying) {
                         isCrying = true;
                         bebekMonitorActivity.runOnUiThread(new Runnable() {
